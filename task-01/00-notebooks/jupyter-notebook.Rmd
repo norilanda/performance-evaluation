@@ -1,0 +1,156 @@
+This is a Jupyter notebook version of the R introduction notes.
+A notebook is like a Markdown document except the code
+fragments are executed and the output is included in
+the notebook.
+
+To render the notebook, use the Jupyter Lab environment with an R kernel.
+The Jupytext extension is required to import the textual notebook version.
+
+# Help
+
+An essential function in R is `help`.
+Since the function is interactive, it is not suitable for inclusion in notebooks.
+
+```r
+help (help)
+```
+
+# Packages
+
+A significant benefit of R is in the availability of various packages or libraries.
+Typically, these are available through the [CRAN archive](https://cran.r-project.org),
+but R can install them directly using the `install.packages` command. Once a package
+is installed, the exported symbols are loaded using the `library` command. We will
+be using the [Tidyverse Package Collection](https://www.tidyverse.org).
+
+```{r}
+library ('tidyverse')
+```
+
+# Vectors
+
+Among the basic vector types in R are `logical`, `integer`, `double`, `complex` and `character`.
+Scalars are in fact vectors of length one.
+Indices start at 1.
+
+```{r}
+x <- c (2, 3, 4, 3, 3, 2, 5, 1, 2, 3)
+print (x)
+```
+
+Generate 5 numbers from normal distribution with mean of 10 and SD of 2 (N (10, 4)).
+
+```{r}
+x <- rnorm (5, 10, 2)
+print (x)
+```
+
+# Viewing Large Data
+
+```{r}
+x <- rnorm (1000, 10, 2)
+head (x)
+```
+
+# Plotting with Plain R
+
+## Simple Plot
+
+```{r}
+plot (x)
+plot (x, type='l') # Lines instead of dots
+```
+
+## Boxplot
+
+Extremely useful to get a quick feel for data distribution.
+Can also be used for roughly comparing alternatives.
+
+```{r}
+boxplot (x)
+```
+
+## Histogram
+
+To view the empirical distribution:
+
+```{r}
+hist (x)
+```
+
+## Zooming
+
+```{r}
+plot (x [2:20])
+plot (x, xlim=c (2,20), ylim=c (3,8))
+```
+
+## Colors and Legend
+
+```{r}
+x1 <- rnorm (100, 10, 2)
+x2 <- rnorm (100, 14, 2)
+x3 <- rnorm (100, 18, 2)
+plot (x1, ylim = c (0, max (c (x1, x2, x3))), col = 'blue')
+points (x2, col = 'red')
+points (x3, col = 'green')
+legend ('topright', legend = c ('x1', 'x2', 'x3'), col = c ('blue', 'red', 'green'), pch = 20)
+```
+
+# Plotting with Tidyverse GGPlot
+
+## Reading Data from File
+
+```{r}
+x <- read_csv ('https://d3s.mff.cuni.cz/files/teaching/nswi131/labs/01/data.csv.gz', col_types = 'cnii')
+print (x)
+```
+
+## Plot One Run
+
+```{r}
+xx <- x |> filter (benchmark == 'alpha', run == 1)
+```
+
+Note that `xx` is again a tibble.
+
+```{r}
+ggplot (xx, aes (x = loop, y = score)) + geom_point ()
+```
+
+The `ggplot` function creates a plot object with given data as source.
+The `aes` information provides defaults for data dependent values.
+The `geom` functions add actual output to the plot object.
+
+## More Runs with Colors
+
+```{r}
+xx <- x |> filter (benchmark == 'alpha')
+ggplot (xx, aes (x = loop, y = score, color = run)) + geom_line (alpha = 0.2)
+```
+
+## Boxplots
+
+Factors are category types where each category has a name.
+Internally factors are represented as integers.
+Beware mixing factors with different levels.
+
+```{r}
+xx <- x |> filter (benchmark == 'alpha')
+ggplot (xx, aes (x = factor (run), y = score)) + geom_boxplot ()
+```
+
+## Histograms
+
+```{r}
+xx <- x |> filter (benchmark == 'alpha')
+ggplot (xx, aes (x = score)) + geom_histogram (bins = 100)
+ggplot (xx, aes (x = score, color = factor (run))) + geom_histogram (bins = 100)
+```
+
+## Facets
+
+```{r}
+ggplot (x, aes (x = score)) + geom_histogram (bins = 100) + facet_wrap (vars (benchmark))
+ggplot (x, aes (x = score)) + geom_histogram (bins = 100) + facet_wrap (vars (benchmark), scale = 'free')
+```
