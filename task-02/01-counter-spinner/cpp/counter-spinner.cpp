@@ -69,11 +69,53 @@ public:
     }
 };
 
+class data_translations_lookaside_buffer_misses : public workload {
+private:
+    static const int PAGE_SIZE = 4096;
+    static const int STRIDE = PAGE_SIZE / sizeof(int);
+    static const int PAGES = 16384;
+    static const int N = PAGES * STRIDE;
+    static const int TOUCHES_PER_EXEC = 64;
+    static const int PAGE_JUMP = 97;
+    volatile int *data;
+    unsigned page = 0;
+
+public:
+    data_translations_lookaside_buffer_misses() {
+        data = new volatile int[N];
+        for (int i = 0; i < N; ++i) {
+            data[i] = i;
+        }
+    }
+
+    ~data_translations_lookaside_buffer_misses() override {
+        delete[] data;
+    }
+
+    const char *name () override { return "data_translations_lookaside_buffer_misses"; }
+    
+    int execute () override { 
+        int acc = 0;
+
+        for (int i = 0; i < TOUCHES_PER_EXEC; ++i) {
+            page = (page + PAGE_JUMP) % PAGES;
+            unsigned idx = page * STRIDE;
+
+            int v = data[idx] + 1;
+            data[idx] = v;
+            acc += v;
+        }
+
+        return acc;
+    }
+};
+
 int main(int argc, char *argv []) {
     harness_init ();
     // harness_run (new fp_instructions (), "PAPI_FP_OPS");
     harness_run (new branch_instructions_mispredicted (), "PAPI_BR_MSP");
     harness_run (new l2_data_cache_misses (), "PAPI_L2_DCM");
+    harness_run (new data_translations_lookaside_buffer_misses (), "PAPI_TLB_DM");
     harness_done ();
 
     return (0);
