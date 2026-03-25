@@ -12,10 +12,14 @@ Score: 5.06 instructions/event
 
 ### 1. Branch Mispredict (PAPI_BR_MSP)
 Description: Conditional branch instructions mispredicted
-...
 
-### 2. L2 Cache Misses (PAPI_L2_DCM)
+Code: the implemented code is inside the `branch_instructions_mispredicted` class. Firstly it changes the `pseudoRandomState` so it is not easy to predict it with lightweight operations (integer shifts and XORs). Then the first least significant bit is used in the first if and the second in the second one. Each branch changes the `acc` variable and the final value is returned.
+
+
+### 2. L2 Data Cache Misses (PAPI_L2_DCM)
 Description: Level 2 data cache misses
+
+Code: the implemented code is inside the `l2_data_cache_misses` class.
 ...
 
 ### 3. Address Cache Misses (PAPI_TLB_DM)
