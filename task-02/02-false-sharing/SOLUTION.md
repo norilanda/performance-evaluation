@@ -63,3 +63,6 @@ for d in 0 1 64; do
   echo -n "  L1_DCA/iter median: "; grep -o 'L1_DCA/iter=[0-9.]*' "$f" | cut -d= -f2 | median
 done
 ```
+
+## Known Issues
+On this platform, PAPI_L1_DCM was unavailable, so PAPI_L2_DCM was used instead. 
